@@ -41,9 +41,10 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
 
-    const menuCollection = client.db("tasteTrail").collection("menu");
-    const categoryCollection = client.db("tasteTrail").collection("category");
-    const userCollection = client.db("tasteTrail").collection("user");
+    const productCollection = client.db("uniShop").collection("products");
+    const categoryCollection = client.db("uniShop").collection("categories");
+    const userCollection = client.db("uniShop").collection("user");
+    const reviewCollection = client.db("uniShop").collection("review");
 
     // middleware again
 
@@ -58,14 +59,14 @@ async function run() {
       next();
     };
 
-    // // jwt api
-    // app.post("/jwt", async (req, res) => {
-    //   const user = req.body;
-    //   const token = await jwt.sign(user, process.env.SECRET_TOKEN, {
-    //     expiresIn: "1h",
-    //   });
-    //   res.send({ token });
-    // });
+    // jwt api
+    app.post("/jwt", async (req, res) => {
+      const user = req.body;
+      const token = await jwt.sign(user, process.env.JWT_SECRET, {
+        expiresIn: "1h",
+      });
+      res.send({ token });
+    });
 
     // user api
     app.post("/user", async (req, res) => {
@@ -143,65 +144,31 @@ async function run() {
     });
 
     // review api
-    app.post("/review", async (req, res) => {
-      const reviewItem = req.body;
-      const result = await reviewCollection.insertOne(reviewItem);
-      res.send(result);
-    });
-
     app.get("/review", async (req, res) => {
       const result = await reviewCollection.find().toArray();
       res.send(result);
     });
 
-    // reservation api
-    app.post("/reservation", async (req, res) => {
-      const reservationItem = req.body;
-      const result = await reservationCollection.insertOne(reservationItem);
+    // product api
+    app.get("/product", async (req, res) => {
+      const result = await productCollection.find().toArray();
       res.send(result);
     });
 
-    app.get("/reservation", async (req, res) => {
-      const email = req.query.email;
-      const admin = req.query.admin;
-      let query = {};
-
-      if (email) {
-        query.email = email;
-      } else if (admin) {
-        query.admin = admin;
-      }
-      const result = await reservationCollection.find().toArray();
+    app.post("/product", async (req, res) => {
+      const productItem = req.body;
+      const result = await productCollection.insertOne(productItem);
       res.send(result);
     });
 
-    app.delete("/reservation/:id", async (req, res) => {
+    app.delete("/product/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
-      const result = await reservationCollection.deleteOne(query);
+      const result = await productCollection.deleteOne(query);
       res.send(result);
     });
 
-    // menu api
-    app.get("/menu", async (req, res) => {
-      const result = await menuCollection.find().toArray();
-      res.send(result);
-    });
-
-    app.post("/menu", async (req, res) => {
-      const menuItem = req.body;
-      const result = await menuCollection.insertOne(menuItem);
-      res.send(result);
-    });
-
-    app.delete("/menu/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await menuCollection.deleteOne(query);
-      res.send(result);
-    });
-
-    app.patch("/menu/:id", async (req, res) => {
+    app.patch("/product/:id", async (req, res) => {
       const item = req.body;
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
@@ -217,62 +184,11 @@ async function run() {
         },
       };
 
-      const result = await menuCollection.updateOne(
+      const result = await productCollection.updateOne(
         filter,
         updatedDoc,
         options
       );
-      res.send(result);
-    });
-
-    //   cart api
-    app.post("/cart", async (req, res) => {
-      const bookingItem = req.body;
-      const result = await cartCollection.insertOne(bookingItem);
-      res.send(result);
-    });
-    app.get("/cart", async (req, res) => {
-      const email = req.query.email;
-      const admin = req.query.admin;
-      let query = {};
-
-      if (email) {
-        query.email = email;
-      } else if (admin) {
-        query.admin = admin;
-      }
-      const result = await cartCollection.find(query).toArray();
-      res.send(result);
-    });
-    app.delete("/cart/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await cartCollection.deleteOne(query);
-      res.send(result);
-    });
-
-    //   order api
-    app.post("/order", async (req, res) => {
-      const orderedItem = req.body;
-      const result = await orderCollection.insertOne(orderedItem);
-      res.send(result);
-    });
-
-    app.get("/order", async (req, res) => {
-      const result = await orderCollection.find().toArray();
-      res.send(result);
-    });
-
-    app.delete("/order/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await orderCollection.deleteOne(query);
-      res.send(result);
-    });
-    app.delete("/order/admin/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { eventId: new ObjectId(id) };
-      const result = await orderCollection.deleteOne(query);
       res.send(result);
     });
 
