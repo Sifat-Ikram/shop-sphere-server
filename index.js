@@ -25,7 +25,7 @@ const verifyToken = (req, res, next) => {
   });
 };
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.jrqljyn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -45,6 +45,7 @@ async function run() {
     const categoryCollection = client.db("uniShop").collection("categories");
     const userCollection = client.db("uniShop").collection("user");
     const reviewCollection = client.db("uniShop").collection("review");
+    const cartCollection = client.db("uniShop").collection("cart");
 
     // middleware again
 
@@ -137,17 +138,26 @@ async function run() {
       res.send(result);
     });
 
+    
     // category api
     app.get("/category", async (req, res) => {
       const result = await categoryCollection.find().toArray();
       res.send(result);
     });
 
+
     // review api
     app.get("/review", async (req, res) => {
       const result = await reviewCollection.find().toArray();
       res.send(result);
     });
+
+    app.post("/review", async (req, res) => {
+      const reviewItem = req.body;
+      const result = await reviewCollection.insertOne(reviewItem);
+      res.send(result);
+    })
+
 
     // product api
     app.get("/product", async (req, res) => {
@@ -191,6 +201,26 @@ async function run() {
       );
       res.send(result);
     });
+
+
+    // cart api
+    app.get("/cart", async (req, res) => {
+      const result = await cartCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.post("/cart", async (req, res) => {
+      const cartItem = req.body;
+      const result = await cartCollection.insertOne(cartItem);
+      res.send(result);
+    });
+
+    app.delete("/cart/:id", async(req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = cartCollection.deleteOne(query);
+      res.send(result);
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
