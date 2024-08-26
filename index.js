@@ -46,6 +46,7 @@ async function run() {
     const userCollection = client.db("uniShop").collection("user");
     const reviewCollection = client.db("uniShop").collection("review");
     const cartCollection = client.db("uniShop").collection("cart");
+    const orderCollection = client.db("uniShop").collection("order");
 
     // middleware again
 
@@ -205,7 +206,15 @@ async function run() {
 
     // cart api
     app.get("/cart", async (req, res) => {
-      const result = await cartCollection.find().toArray();
+      const email = req.query.email;
+      const admin = req.query.admin;
+      let query = {};
+      if (email) {
+        query.email = email
+      } else {
+        query.admin = admin;
+      }
+      const result = await cartCollection.find(query).toArray();
       res.send(result);
     });
 
@@ -219,6 +228,26 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = cartCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    //final order
+    app.post("/order", async(req, res) => {
+      const orderItem = req.body;
+      const result = await orderCollection.insertOne(orderItem);
+      res.send(result);
+    });
+
+    app.get("/order", async(req, res) => {
+      const email = req.query.email;
+      const admin = req.query.admin;
+      let query = {};
+      if (email) {
+        query.email = email;
+      } else {
+        query.admin = admin;
+      }
+      const result = await orderCollection.find(query).toArray();
       res.send(result);
     })
 
