@@ -78,7 +78,7 @@ async function run() {
     // jwt api
     app.post("/jwt", async (req, res) => {
       const user = req.body;
-      const token = await jwt.sign(user, process.env.JWT_SECRET, {
+      const token = await jwt.sign(user, process.env.SECRET_TOKEN, {
         expiresIn: "1h",
       });
       res.send({ token });
@@ -109,7 +109,7 @@ async function run() {
       res.send({ admin });
     });
 
-    app.patch("/user/admin/:id", verifyToken, verifyAdmin, async (req, res) => {
+    app.patch("/user/admin/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updatedDoc = {
@@ -146,7 +146,7 @@ async function run() {
       res.send(result);
     });
 
-    app.delete("/user/:id", verifyToken, verifyAdmin, async (req, res) => {
+    app.delete("/user/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await userCollection.deleteOne(query);
