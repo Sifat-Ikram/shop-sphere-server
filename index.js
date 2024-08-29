@@ -121,31 +121,6 @@ async function run() {
       res.send(result);
     });
 
-    app.patch("/user/:id", async (req, res) => {
-      const item = req.body;
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) };
-      const options = { upsert: true };
-      const updatedDoc = {
-        $set: {
-          name: item.name,
-          email: item.email,
-          photoUrl: photoUrl,
-          gender: item.gender,
-          address: item.address,
-          birthdate: item.birthdate,
-          role: item.role,
-        },
-      };
-
-      const result = await userCollection.updateOne(
-        filter,
-        updatedDoc,
-        options
-      );
-      res.send(result);
-    });
-
     app.delete("/user/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -190,30 +165,6 @@ async function run() {
       res.send(result);
     });
 
-    app.patch("/product/:id", async (req, res) => {
-      const item = req.body;
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) };
-      const options = { upsert: true };
-      const updatedDoc = {
-        $set: {
-          name: item.name,
-          price: parseFloat(item.price),
-          category: item.category,
-          serve_time: item.serve_time,
-          recipe: item.recipe,
-          image: item.image,
-        },
-      };
-
-      const result = await productCollection.updateOne(
-        filter,
-        updatedDoc,
-        options
-      );
-      res.send(result);
-    });
-
     // cart api
     app.get("/cart", async (req, res) => {
       const email = req.query.email;
@@ -225,6 +176,11 @@ async function run() {
         query.admin = admin;
       }
       const result = await cartCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.get("/cart", async (req, res) => {
+      const result = await cartCollection.find().toArray();
       res.send(result);
     });
 
@@ -258,6 +214,32 @@ async function run() {
         query.admin = admin;
       }
       const result = await orderCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.get("/order", verifyAdmin, async (req, res) => {
+      const result = await orderCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.patch("/order/:id", async (req, res) => {
+      const id = req.params.id;
+      const updatedOrder = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedDoc = {
+        $set: {
+          status: updatedOrder.status,
+          paymentStatus: updatedOrder.paymentStatus,
+          deliveryDate: updatedOrder.deliveryDate,
+        },
+      };
+
+      const result = await orderCollection.updateOne(
+        filter,
+        updatedDoc,
+        options
+      );
       res.send(result);
     });
 
