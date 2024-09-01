@@ -61,6 +61,7 @@ async function run() {
     const reviewCollection = client.db("uniShop").collection("review");
     const cartCollection = client.db("uniShop").collection("cart");
     const orderCollection = client.db("uniShop").collection("order");
+    const offerCollection = client.db("uniShop").collection("offer");
 
     // middleware again
 
@@ -165,6 +166,32 @@ async function run() {
       res.send(result);
     });
 
+    app.patch("/product/:id", async (req, res) => {
+      const item = req.body;
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedDoc = {
+        $set: {
+          image: item.image,
+          name: item.name,
+          type: item.type,
+          category: item.category,
+          price: item.price,
+          rating: item.rating,
+          brand: item.brand,
+          details: item.details,
+        },
+      };
+
+      const result = await productCollection.updateOne(
+        filter,
+        updatedDoc,
+        options
+      );
+      res.send(result);
+    });
+
     // cart api
     app.get("/cart", async (req, res) => {
       const email = req.query.email;
@@ -242,6 +269,21 @@ async function run() {
       );
       res.send(result);
     });
+
+    app.delete("/order/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = orderCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // special offers
+    app.get("/offer", async (req, res) => {
+      const result = await offerCollection.find().toArray();
+      res.send(result);
+    });
+
+
 
     //bkash payment integration
     app.post("/bkash-checkout", async (req, res) => {
