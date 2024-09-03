@@ -13,7 +13,15 @@ const {
 } = require("bkash-payment");
 
 // middle wear
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://shop-sphere-client-zeta.vercel.app",
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 const bkashConfig = {
@@ -194,24 +202,28 @@ async function run() {
       }
     });
 
-    app.post('/review/:id/replies', async (req, res) => {
+    app.post("/review/:id/replies", async (req, res) => {
       const { id } = req.params;
       const { replyText, replyUser } = req.body;
-    
+
       try {
         const updatedReview = await reviewCollection.updateOne(
           { _id: new ObjectId(id) },
-          { $push: { replies: { replyText, replyUser, createdAt: new Date() } } }
+          {
+            $push: { replies: { replyText, replyUser, createdAt: new Date() } },
+          }
         );
-    
+
         if (updatedReview.modifiedCount === 0) {
-          return res.status(404).json({ message: 'Review not found' });
+          return res.status(404).json({ message: "Review not found" });
         }
-    
-        const review = await reviewCollection.findOne({ _id: new ObjectId(id) });
+
+        const review = await reviewCollection.findOne({
+          _id: new ObjectId(id),
+        });
         res.status(200).json(review);
       } catch (error) {
-        res.status(500).json({ message: 'Error adding reply' });
+        res.status(500).json({ message: "Error adding reply" });
       }
     });
 
