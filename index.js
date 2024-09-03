@@ -147,6 +147,74 @@ async function run() {
       res.send(result);
     });
 
+    // Route to handle liking a review
+    app.post("/review/:id/like", async (req, res) => {
+      const { id } = req.params;
+
+      try {
+        const review = await reviewCollection.findOne({
+          _id: new ObjectId(id),
+        });
+
+        if (!review)
+          return res.status(404).json({ message: "Review not found" });
+
+        const updatedReview = await reviewCollection.findOneAndUpdate(
+          { _id: new ObjectId(id) },
+          { $inc: { likes: 1 } },
+          { returnOriginal: false }
+        );
+
+        res.status(200).json(updatedReview.value);
+      } catch (error) {
+        res.status(500).json({ message: "Error liking review" });
+      }
+    });
+
+    app.post("/review/:id/dislike", async (req, res) => {
+      const { id } = req.params;
+
+      try {
+        const review = await reviewCollection.findOne({
+          _id: new ObjectId(id),
+        });
+
+        if (!review)
+          return res.status(404).json({ message: "Review not found" });
+
+        const updatedReview = await reviewCollection.findOneAndUpdate(
+          { _id: new ObjectId(id) },
+          { $inc: { dislikes: 1 } },
+          { returnOriginal: false }
+        );
+
+        res.status(200).json(updatedReview.value);
+      } catch (error) {
+        res.status(500).json({ message: "Error disliking review" });
+      }
+    });
+
+    app.post('/review/:id/replies', async (req, res) => {
+      const { id } = req.params;
+      const { replyText, replyUser } = req.body;
+    
+      try {
+        const updatedReview = await reviewCollection.updateOne(
+          { _id: new ObjectId(id) },
+          { $push: { replies: { replyText, replyUser, createdAt: new Date() } } }
+        );
+    
+        if (updatedReview.modifiedCount === 0) {
+          return res.status(404).json({ message: 'Review not found' });
+        }
+    
+        const review = await reviewCollection.findOne({ _id: new ObjectId(id) });
+        res.status(200).json(review);
+      } catch (error) {
+        res.status(500).json({ message: 'Error adding reply' });
+      }
+    });
+
     // product api
     app.get("/product", async (req, res) => {
       const result = await productCollection.find().toArray();
@@ -282,8 +350,6 @@ async function run() {
       const result = await offerCollection.find().toArray();
       res.send(result);
     });
-
-
 
     //bkash payment integration
     app.post("/bkash-checkout", async (req, res) => {
