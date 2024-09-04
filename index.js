@@ -130,6 +130,30 @@ async function run() {
       res.send(result);
     });
 
+    app.patch("/user/:id", async (req, res) => {
+      const item = req.body;
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedDoc = {
+        $set: {
+          name: item.name,
+          email: item.email,
+          address: item.address,
+          image: item.image,
+          cardMethod: item.cardMethod,
+          cardNumber: item.cardNumber,
+        },
+      };
+
+      const result = await userCollection.updateOne(
+        filter,
+        updatedDoc,
+        options
+      );
+      res.send(result);
+    });
+
     app.delete("/user/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
