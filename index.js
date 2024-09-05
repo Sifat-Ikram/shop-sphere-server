@@ -70,6 +70,7 @@ async function run() {
     const cartCollection = client.db("uniShop").collection("cart");
     const orderCollection = client.db("uniShop").collection("order");
     const offerCollection = client.db("uniShop").collection("offer");
+    const bannerCollection = client.db("uniShop").collection("banner");
 
     // middleware again
 
@@ -176,6 +177,18 @@ async function run() {
     app.post("/review", async (req, res) => {
       const reviewItem = req.body;
       const result = await reviewCollection.insertOne(reviewItem);
+      res.send(result);
+    });
+
+    // banner api
+    app.get("/banner", async (req, res) => {
+      const result = await bannerCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.post("/banner", async (req, res) => {
+      const bannerItem = req.body;
+      const result = await bannerCollection.insertOne(bannerItem);
       res.send(result);
     });
 
