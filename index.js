@@ -100,6 +100,7 @@ async function run() {
       const result = await userCollection.insertOne(user);
       res.send(result);
     });
+
     app.get("/user", async (req, res) => {
       const result = await userCollection.find().toArray();
       res.send(result);
@@ -189,6 +190,13 @@ async function run() {
     app.post("/banner", async (req, res) => {
       const bannerItem = req.body;
       const result = await bannerCollection.insertOne(bannerItem);
+      res.send(result);
+    });
+
+    app.delete("/banner/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await bannerCollection.deleteOne(query);
       res.send(result);
     });
 
@@ -350,18 +358,18 @@ async function run() {
 
     app.get("/order", async (req, res) => {
       const email = req.query.email;
-      const admin = req.query.admin;
+      const admin = req.query.role;
       let query = {};
       if (email) {
         query.email = email;
       } else {
-        query.admin = admin;
+        query.role = admin;
       }
       const result = await orderCollection.find(query).toArray();
       res.send(result);
     });
 
-    app.get("/order", verifyAdmin, async (req, res) => {
+    app.get("/order/admin", async (req, res) => {
       const result = await orderCollection.find().toArray();
       res.send(result);
     });
